@@ -27,7 +27,6 @@ class TokenApiView(views.APIView):
     permission_classes=[AllowAny,]
     authentication_classes=[SessionAuthentication,]
     def get(self , request , *args , **kwargs):
-        print('entered')
         REDIRECT_URL=f"{AUTH_CODE_URL}?client_id={CLIENT_ID}&redirect_uri={BACKEND_URL_REDIRECT}"
         return redirect(REDIRECT_URL)
 
@@ -41,12 +40,10 @@ class TokenRedirectAPIView(views.APIView):
         # checks if there is error from code
         try:
             _header["error"]
-            print(_header['res'])
             return Response(data=_header['res'],status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except  KeyError:
             pass
         user_data = requests.get(USER_INFO_URL , headers=_header).json()
-        print(user_data)
         # user_data contains a dict with key detail on error
         try:
             if user_data['detail']:
@@ -80,7 +77,6 @@ class TokenRedirectAPIView(views.APIView):
             success = {
                 "message":"User SuccessFully logged in"
             }
-            print(request.user.id)
             return Response(data=success ,status=status.HTTP_200_OK)
         except:
             err = {

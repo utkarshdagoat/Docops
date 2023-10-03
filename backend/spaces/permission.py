@@ -11,7 +11,6 @@ class IsInSpace(BasePermission):
     '''
     def has_object_permission(self , request,view , obj):
         is_user_in_space = IsUserInSpace(obj=obj , user=request.user)
-        print(is_user_in_space)
         return is_user_in_space
 
 class IsTheCreater(BasePermission):

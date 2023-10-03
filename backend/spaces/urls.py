@@ -1,6 +1,9 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from spaces.views import PublicSpaceViewSet , PrivateSpaceViewSet , RequestAPIView , RequestStateAPIView , AcceptOrRejectRequestAPIView,PrivateSpaceRetrieve
+from spaces.views import PublicSpaceViewSet , PrivateSpaceViewSet , RequestAPIView , RequestStateAPIView , AcceptOrRejectRequestAPIView
+
+
+
 router = DefaultRouter()
 router.register(r'public' , PublicSpaceViewSet , basename="public")
 router.register(r'private' , PrivateSpaceViewSet , basename="private")

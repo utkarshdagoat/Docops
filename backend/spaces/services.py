@@ -33,3 +33,44 @@ def doesSpaceNameExist(name:str) -> bool:
         return True
     except:
         return False
+
+def SpaceInstanceFromContext(context : dict , validated_data:dict) -> Space:
+    """
+    Creates a space instance from context and validated_data passed in the serializer
+
+    Args:
+        context (dict): The context dictionary passed into the serializer
+        validated_data (dict): The validated_data passed into the Serializer
+
+    Returns:
+        Space: Creates a Space instance with creater of the instance as the user in request
+    """
+    validated_data['creater'] =  context['request'].user 
+    instance = Space.objects.create(**validated_data)
+    return instance
+
+
+def RequestInstanceForSendingRequest(context: dict , validated_data : dict) -> Request:
+    
+    validated_data['from_user'] = self.context['request'].user
+    invite_code = uuid.UUID(validated_data['invite_code'])
+    space = Space.objects.get(invite_code=invite_code)
+    validated_data['space'] = space
+    validated_data['state'] = REQUEST_STATE[0]
+    instance = Request.objects.create(space=validated_data['space'] , from_user=validated_data['from_user'] , state=validated_data['state'])
+    return instance
+
+
+
+def updateRequestInstance(context:dict , instance : Request , validated_data:dict) -> Request:
+    user = self.context['request'].user
+    space = instance.space
+    if space.creater != user:
+        raise serializers.ValidationError('You are not the creater')
+    state = validated_data['state']
+    if state == 'accepted':
+        user = instance.from_user
+        space.users.add(user)
+    instance.state = state
+    instance.save()
+    return instance

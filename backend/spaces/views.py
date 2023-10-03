@@ -1,5 +1,3 @@
-import  jwt
-
 from rest_framework import generics , views , viewsets , permissions , authentication , mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -10,7 +8,8 @@ from rest_framework import status
 
 from .models.space import Space
 from .models.request import Request
-from .serializers import PublicSpaceSerializer , SendRequestSerializer , PrivateSpaceSerializer , AcceptOrRejectRequestSerializer , RequestStateSerializer , PrivateListSpaceSerializer
+from .serializers.space import PublicSpaceSerializer  , PrivateSpaceSerializer
+from .serializers.request import SendRequestSerializer , AcceptOrRejectRequestSerializer , RequestStateSerializer
 from .permission import IsInSpace , IsTheCreater
 from myauth.models import User
 
@@ -37,24 +36,13 @@ class PrivateSpaceViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = User.objects.get(pk=self.request.user.id).space_set.filter(isPrivate=True) | Space.objects.filter(creater=self.request.user , isPrivate=True)
-        print(queryset)
         return queryset
-
-class PrivateSpaceRetrieve(generics.RetrieveAPIView):
-    permission_classes = [ permissions.IsAuthenticated, IsInSpace]
-    authentication_classes = [authentication.SessionAuthentication,]
-    queryset = Space.objects.filter(isPrivate=True)
-    serializer_class = PrivateSpaceSerializer
-
-
 
 class RequestAPIView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [authentication.SessionAuthentication]
     queryset = Request.objects.all()
     serializer_class = SendRequestSerializer
-
-    
 
 
     

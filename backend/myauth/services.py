@@ -1,19 +1,16 @@
 import environ
 import os
 import requests
+import traceback
 from docops.settings import BASE_DIR
 
 from .models import User
-
-
-env = environ.Env()
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
-TOKEN_REQUEST_URL=env('TOKEN_REQUEST_URL')
-CLIENT_ID=env('CLIENT_ID') 
-BACKEND_URL_REDIRECT=env('BACKEND_URL_REDIRECT')
-CLIENT_SECRET = env('CLIENT_SECRET')
+from constants.constants import CLIENT_ID , CLIENT_SECRET , BACKEND_URL_REDIRECT, TOKEN_REQUEST_URL
 
 def headerFromCode(code:str)->dict:    
+    '''
+        Call the TOKEN request url for accesstoken from the code provided by channel i outh client
+    '''
     request_data = {
             "client_id":CLIENT_ID,
             "client_secret":CLIENT_SECRET,
@@ -34,20 +31,25 @@ def headerFromCode(code:str)->dict:
 
 
 def UserFromRequest(user:dict) -> list :
+    '''
+        Takes the user from oauth2 provided by channeli converts it into a list providing user and is the user member and is empty when dict passed is invalid
+    '''
+    try:
         username : str = user["person"]["fullName"]
         display_picture = user["person"]["displayPicture"]
-        if display_picture is None:
-            display_picture = 'nil' 
         roles:list = user["person"]["roles"]
         year : int = user["student"]["currentYear"]
-        email : str = user["contactInformation"]["emailAddressVerified"]
+        email : str = user["contactInformation"]["emailAddress"]
         isMember : bool = False
         for role in roles:
-            if role['role'] == "Maintainer" :
-                isMember=True
-
-        user , _ =User.objects.get_or_create( username=username, email=email , display_picture=display_picture, year=2)  
-        print(user)
+            try:
+                if role['role'] == "Maintainer" :
+                    isMember=True
+            except:
+                pass
+        user , _ =User.objects.get_or_create( username=username, email=email , display_picture=display_picture, year=year)  
 
         return [user , isMember ] 
-   
+    except:
+        traceback.print_exc()
+        return []

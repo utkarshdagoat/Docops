@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from django.core.validators import MaxValueValidator , MinValueValidator
-from .manager import MyUserManager
 # Create your models here
 
 
@@ -15,15 +14,12 @@ class User(AbstractBaseUser):
                     MaxValueValidator(5)
                 ]
             )
-    display_picture = models.CharField(max_length=200)
+    display_picture = models.URLField(max_length=200 , null=True , blank=True)
     email = models.EmailField(
                 verbose_name="email address",
                 max_length=255,
                 unique=True
             )
-    password=None
 
-    objects=MyUserManager()
-
-    USERNAME_FIELD = 'username'
+    USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['year']

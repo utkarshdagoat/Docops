@@ -40,10 +40,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'myauth',
     'rest_framework',
-    'spaces'
+    'spaces',
+    'files'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -134,3 +136,19 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ),
 }
+
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ALLOW_CREDENTIALS = True
+
+
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:5174',
+]
+
+
+CSRF_TRUSTED_ORIGINS = ["http://localhost:5174"]
+
+MEDIA_ROOT = BASE_DIR/'media'
+MEDIA_URL = '/media/'
+
+

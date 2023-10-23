@@ -12,20 +12,33 @@ from rest_framework import generics , views , mixins
 from rest_framework.permissions import AllowAny , IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.authentication import SessionAuthentication , TokenAuthentication
 # Create your views here.
 from .models import User
 from spaces.models.space import Space
 
+from docops.authentication import CsrfExemptSessionAuthentication
 
 from.services import UserFromRequest , headerFromCode
 from .serializers import UserSerializers , UserSpacesSerializers
 from constants.constants import AUTH_CODE_URL , BACKEND_URL_REDIRECT ,USER_INFO_URL , CLIENT_ID
 
+class isLoggedIn(views.APIView):
+    authentication_classes=[CsrfExemptSessionAuthentication]
+    def get(self,request,*args,**kwargs):
+        content = {"LoggedIn" : False}
+        if request.user.is_authenticated:
+            serializer = UserSerializers(request.user)
+            content = {"LoggedIn":True , 'user':serializer.data }
+        
+        return Response(content)
+
+
+
+
 
 class TokenApiView(views.APIView):
     permission_classes=[AllowAny,]
-    authentication_classes=[SessionAuthentication,]
+    authentication_classes=[CsrfExemptSessionAuthentication,]
     def get(self , request , *args , **kwargs):
         REDIRECT_URL=f"{AUTH_CODE_URL}?client_id={CLIENT_ID}&redirect_uri={BACKEND_URL_REDIRECT}"
         return redirect(REDIRECT_URL)
@@ -33,7 +46,7 @@ class TokenApiView(views.APIView):
 
 class TokenRedirectAPIView(views.APIView):
     permission_classes=[AllowAny,]
-    authentication_classes=[SessionAuthentication,]
+    authentication_classes=[CsrfExemptSessionAuthentication,]
     def get(self, request , *args , **kwargs):
         code = request.GET.get('code' , '') 
         _header = headerFromCode(code)
@@ -74,10 +87,7 @@ class TokenRedirectAPIView(views.APIView):
         
         try:
             login(request , user=user)
-            success = {
-                "message":"User SuccessFully logged in"
-            }
-            return Response(data=success ,status=status.HTTP_200_OK)
+            return redirect("http://localhost:5174/")
         except:
             err = {
                 "message":"Unable to Login user"
@@ -88,7 +98,7 @@ class TokenRedirectAPIView(views.APIView):
 
 class LogoutAPIView(views.APIView):
     permission_classes = [IsAuthenticated,]
-    authentication_classes = [SessionAuthentication,]
+    authentication_classes = [CsrfExemptSessionAuthentication,]
     def get(self,request , *args , **kwargs):
         logout(request)
         success = {
@@ -103,7 +113,7 @@ class UserAPIView(generics.GenericAPIView ,mixins.RetrieveModelMixin):
     queryset = User.objects.all()
     serializer_class = UserSerializers 
     permission_classes = [IsAuthenticated,]
-    authentication_classes = [SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication]
 
     def get(self, request , *args , **kwargs):
         return self.retrieve(request=request , *args , **kwargs)
@@ -111,7 +121,7 @@ class UserAPIView(generics.GenericAPIView ,mixins.RetrieveModelMixin):
 class UserSpaceAPIView(generics.GenericAPIView , mixins.ListModelMixin):
     serializer_class = UserSpacesSerializers
     permission_classes = [IsAuthenticated,]
-    authentication_classes = [SessionAuthentication,]
+    authentication_classes = [CsrfExemptSessionAuthentication,]
     
     def get_queryset(self):
         user_id = self.request.user.id

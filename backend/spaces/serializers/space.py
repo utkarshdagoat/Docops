@@ -14,10 +14,7 @@ from myauth.serializers import UserSerializers
 
 
 class PublicSpaceSerializer(serializers.ModelSerializer):
-    creater = serializers.HyperlinkedRelatedField(
-        view_name='auth:user-detail',
-        read_only=True
-    )
+    creater = UserSerializers(read_only=True)
     isPrivate = serializers.BooleanField(default=False , read_only=True)
     invite_code = serializers.UUIDField(default=uuid.uuid4 , read_only=True)
     class Meta:

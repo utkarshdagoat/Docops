@@ -1,89 +1,191 @@
-import { FC, useState } from "react";
-import { useGetSpaceQuery } from "../services/space";
+import { FC, useEffect, useState } from "react";
+import { spaceApi, useGetSpaceQuery } from "../services/space";
 import IMAGES from "../images/Images";
-import { IconLock } from "@tabler/icons-react";
-import {SpaceCreateForm} from "../components/space-create-modal";
+
+
+import {
+    Card,
+    CardHeader,
+    CardBody,
+    Button,
+    CardFooter,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    useDisclosure,
+    Input,
+    Textarea,
+    Select,
+    SelectItem
+} from "@nextui-org/react";
+
+import { privateSpaceApi } from "../services/private-space";
+import { useNavigate } from "react-router-dom";
+import { documentApi, fileCreation } from "../services/file";
+
 
 enum active {
     about = 1,
     user = 2
 }
 
-const Space : FC = ()=>{
-    const {data , isLoading , error} = useGetSpaceQuery()
-    const [active , setActive] = useState<active>(1)
+const Space: FC = () => {
 
-    const [showForm , setShowForm] = useState<boolean>(false)
-    console.log(data)
-    return (
-       <div> 
-        {error? (
-            <>Oh no something went wrong</>
-        ) : isLoading ? (
-            <img src={IMAGES.loading} />)
-            : (<>
-                 {!data?.length  ? (
-          <>Nothing to Show Here</>
-       ) : (
-       <div className="flex flex-wrap justify-center">
-        {data.map((space ,index)=>(
-        <div className="w-full bg-white border border-gray-200 rounded-lg shadow max-w-1/3 m-6 flex flex-col" key={index}>
-            <div className="flex text-sm font-medium text-center text-gray-500 border-b border-gray-200 rounded-t-lg bg-gray-50" >
-            <div className="flex flex-row ">
-                <div className="mr-2">
-                    <button className="inline-block p-4 focus:text-blue-600 rounded-tl-lg hover:bg-gray-100" onClick={()=>setActive(1)}>About</button>
-                    </div>
-                <div className="mr-2">
-                    <button type="button"className="inline-block p-4 focus:text-blue-600 hover:bg-gray-100" onClick={()=>setActive(2)}>Users</button>
-                </div>{
-                    space.isPrivate && 
-                <div className="ml-10 p-4">
-                    <IconLock size={18}/>
-                </div>}
-                {
-                    !space.isPrivate &&
-                    <div className="p-4">
-                        <strong>Invite Code</strong>:{"  "}{space.invite_code}
-                    </div>
+    const { data, isLoading, error } = useGetSpaceQuery()
+    const { isOpen, onOpen, onOpenChange } = useDisclosure()
+    const [name, setName] = useState<string>('')
+    const [description, setDescription] = useState<string>('')
+    const [isPrivate, setIsPrivate] = useState<boolean>(false)
+    const [selectedSpace, setSelectedSpace] = useState<number | null>(null)
+
+    const navigate = useNavigate()
+
+    const [publicTrigger, publicData] = spaceApi.endpoints.createPublicSpace.useLazyQuery()
+    const [privateTrigger, privateData] = privateSpaceApi.endpoints.createPrivateSpace.useLazyQuery()
+
+    const [trigger, doc] = documentApi.endpoints.saveDoc.useLazyQuery()
+
+    const handleSubmit = () => {
+        if (isPrivate) {
+            privateTrigger({ name, description })
+            if (!privateData.isLoading && !privateData.isError) { }
+        } else {
+            publicTrigger({ name, description })
+            if (!publicData.isLoading && !publicData.isError) { }
+        }
+    }
+
+
+    const handleSpaceClick = (index: number) => {
+        if (data?.[index].name) {
+            const spaceName: fileCreation = {
+                space: data?.[index].name
+            }
+            trigger(spaceName)
+            setSelectedSpace(index)
+        }
+    }
+
+    useEffect(() => {
+        console.log(selectedSpace)
+        console.log(doc?.data)
+        if (selectedSpace !== null) {
+            if (data) {
+                if (doc.data) {
+                    navigate(`/space/${data?.[selectedSpace]?.name}/document/${doc.data}`)
                 }
-            </div>
-                </div>
-                    {active == 1 && 
-                    <div className=" p-4 bg-white rounded-lg md:p-8" id="about" role="tabpanel" aria-labelledby="about-tab">
-                    <h2 className="mb-3 text-3xl font-extrabold tracking-tight text-gray-900">{space.name}</h2>
-                    <p className="mb-3 pr-2 text-gray-500">{space.description}</p>
-                    </div>
-                    }
-                    { active == 2 && 
-                    <>
-                    {[...space.users , space.creater].map((user,index)=>(
-                     <div className=" p-4 bg-white rounded-lg md:p-8 " id="services" role="tabpanel" aria-labelledby="services-tab" key={index}>
-                        <ul role="list" className="space-y-4 text-gray-500 ">
-                            <li className="flex space-x-2 items-center">
-                            <img src={user.displayPicture ? user.displayPicture : IMAGES.Profile} width={36} height={36}/>
-                             <span className="leading-tight">{user.username}</span>
-                        </li> 
-                    </ul>
-                    </div>
-                    ))}
-                    </>}
-                
-                </div> ))}
-                <button className="relative rounded-xl px-5 py-2.5 h-max mt-20 mx-20 overflow-hidden group bg-blue-500 relative hover:bg-gradient-to-r hover:from-blue-500 hover:to-blue-400 text-white hover:ring-2 hover:ring-offset-2 hover:ring-blue-400 transition-all ease-out duration-300" onClick={()=>setShowForm(true)}>
-                        Create New Space
-                </button>
-                </div>)}
-                 {showForm && 
-                    <div className="absolute shadow-3xl rounded-lg" id="modal">
-                        <SpaceCreateForm setShow={setShowForm}/>
-                    </div>
-                }  
-                </>
-            )}
+            }
+        }
+    }, [doc?.data, doc?.error, selectedSpace])
 
-        
-       
-</div>
+    return (
+        <div className="flex justify-center items-center space-x-28 my-0 mx-auto p-20" >
+            {error ? (
+                <>Oh no something went wrong</>
+            ) : isLoading ? (
+                <img src={IMAGES.loading} />)
+                : (
+                    <>
+                        {!data?.length ? (
+                            <div className="bg-cover flex justify-center items-center flex-col items-center">
+                                <img src={IMAGES.emptyState} width={600} height={400} />
+                                <div className="font-bold text-zinc-500 text-lg">Nothing to Show Here </div>
+                                <div className="flex space-x-10 p-4">
+                                    <Button color="secondary" variant="ghost" className="focus:outline-none focus-visible:outline-none" onPress={onOpen}>Create</Button>
+                                    <Button color="secondary" variant="ghost">Join</Button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex flex-wrap justify-evenly space-x-3">
+                                {data.map((space: any, index: number) => (
+                                    <>
+                                        <Card className="m-6 p-4" key={index}>
+                                            <CardHeader className="justify-between hover:cursor-pointer">
+                                                <div className="flex gap-5">
+                                                    <div className="flex flex-col gap-1 items-start justify-center">
+                                                        <h2 className="text-xl font-semibold leading-none text-default-600">{space.name}</h2>
+                                                        <h5 className="text-small tracking-tight text-default-400">{space.invite_code}</h5>
+                                                    </div>
+                                                </div>
+                                            </CardHeader>
+                                            <CardBody className="px-3 py-0 text-small text-default-400">
+                                                {space.description}
+                                            </CardBody>
+
+                                            <CardFooter className="gap-3">
+                                                <div className="flex gap-1">
+                                                    <p className="font-semibold text-default-400 text-small">{space.users.length} </p>
+                                                    <p className="text-default-400 text-small">User</p>
+                                                </div>
+                                                <div className="flex gap-1">
+                                                    <p className="font-semibold text-default-400 text-small">97.1K</p>
+                                                    <p className="text-default-400 text-small">Followers</p>
+                                                </div>{!doc.isLoading ?
+                                                    (
+                                                        <Button color="secondary" variant="ghost" onClick={() => handleSpaceClick(index)}>Add File</Button>
+                                                    ) : (
+                                                        <Button color="secondary" isLoading>Loading</Button>
+                                                    )}
+                                            </CardFooter>
+                                        </Card>
+                                    </>))}
+                            </div>
+                        )
+                        }</>)
+            }
+            <Modal
+                backdrop="opaque"
+                isOpen={isOpen}
+                onOpenChange={onOpenChange}
+                radius="lg"
+                classNames={{
+                    body: "py-6",
+                    backdrop: "bg-[#292f46]/50 backdrop-opacity-40",
+                    base: "border-[#292f46] bg-[#19172c] dark:bg-[#19172c] text-[#a8b0d3]",
+                    header: "border-b-[1px] border-[#292f4699]",
+                    footer: "border-t-[1px] border-[#292f4699]",
+                    closeButton: "hover:bg-white/5 active:bg-white/10",
+                }}
+            >
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">Create A Space</ModalHeader>
+                            <ModalBody>
+                                <Input
+                                    label="Name"
+                                    color="secondary"
+                                    className="bg-[--input-color]"
+                                    onChange={(e) => setName(e.target.value)}
+                                />
+                                <Textarea color="secondary" label="Description"
+                                    labelPlacement="outside"
+                                    placeholder="What is your space for?"
+                                    onChange={(e) => setDescription(e.target.value)}
+                                />
+                                <Select
+                                    color="secondary"
+                                    label="Accesibillity"
+                                >
+                                    <SelectItem key="private" onSelect={(e) => setIsPrivate(true)}>Private</SelectItem>
+                                    <SelectItem key="prvate" onSelect={(e) => setIsPrivate(false)}>Public</SelectItem>
+                                </Select>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="secondary" variant="light" onPress={onClose}>
+                                    Close
+                                </Button>
+                                <Button className="bg-[#6f4ef2] shadow-lg shadow-indigo-500/20" onClick={handleSubmit} onPress={onClose}>
+                                    Create
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+        </div>
     )
 }
 

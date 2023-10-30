@@ -4,6 +4,7 @@ import { useAppSelector } from '../hooks/redux'
 import { Link, useNavigate } from 'react-router-dom'
 import useAxios from '../hooks/axios'
 import axios from 'axios'
+import { Button } from '@nextui-org/react'
 
 const Navbar : FC = ()=>{
     const navigate = useNavigate()
@@ -21,7 +22,7 @@ const Navbar : FC = ()=>{
 
 
     return (
-        <div className='flex justify-between py-3 px-2 border-2 border-[--border-color]'>
+        <div className='flex justify-between py-3 px-2 border-b-2 border-[--border-color]'>
             <div className='flex items-center'>
                 <img src={IMAGES.Logo} alt='mySvgImage' width={105} height={28}/>
                 <div className={navItemClass}>
@@ -29,7 +30,7 @@ const Navbar : FC = ()=>{
                 </div>
                 <div className={navItemClass}>
                     <div className='flex align-middle justify-center'>
-                        <>Spaces</>
+                        <Link to='/spaces'>Spaces</Link>
                     <img src={IMAGES.carrot} alt='mySvgImage' width={24} height={24} />
                     </div>
                 </div>
@@ -51,7 +52,7 @@ const Navbar : FC = ()=>{
                  <img src={IMAGES.Notification} alt='mySvgImage' width={32} height={32}/>
                  <img src={src} alt='mySvgImage' width={28} height={28}/>
             {user.LoggedIn && 
-            <button className='bg-[--primary-button-color] text-white rounded-lg max-h-28 font-sans mx-3 text-sm py-0.5 px-2.5' onClick={handleLogout}>Logout</button>}      
+            <Button color='secondary' onClick={handleLogout}>Login</Button> }
             </div>
         </div>
     )

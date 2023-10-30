@@ -32,6 +32,7 @@ AUTH_USER_MODEL='myauth.User'
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -41,7 +42,8 @@ INSTALLED_APPS = [
     'myauth',
     'rest_framework',
     'spaces',
-    'files'
+    'files',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -75,6 +77,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'docops.wsgi.application'
 
+
+ASGI_APPLICATION = "docops.asgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -150,5 +154,17 @@ CSRF_TRUSTED_ORIGINS = ["http://localhost:5174"]
 
 MEDIA_ROOT = BASE_DIR/'media'
 MEDIA_URL = '/media/'
+
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": ["redis://:Gg0BX97LCsyLEf1mrwd32NZStOQP5pSe@redis-17270.c301.ap-south-1-1.ec2.cloud.redislabs.com:17270/0"],
+        },
+    },
+}
+
 
 

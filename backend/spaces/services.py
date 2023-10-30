@@ -2,6 +2,8 @@ from django.contrib.auth.models import Permission
 
 from rest_framework import serializers
 
+from myauth.serializers import UserSerializers
+
 from .models.space import Space
 from .models.request import Request
 from myauth.models import User
@@ -50,7 +52,7 @@ def PublicSpaceInstanceFromContext(context : dict , validated_data:dict) -> Spac
     Returns:
         Space: Creates a Space instance with creater of the instance as the user in request
     """
-    validated_data['creater'] =  context['request'].user 
+    validated_data['creater'] =  context['request'].user
     # grant creater write permission
     grantCreateFilePermission(user=context['request'].user)
     instance = Space.objects.create(**validated_data)

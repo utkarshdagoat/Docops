@@ -4,17 +4,19 @@ import { userApi } from "../services/user";
 import userAuth from "../features/user/userSlice"
 import {spaceApi} from '../services/space'
 import { privateSpaceApi } from "../services/private-space";
+import { documentApi } from "../services/file";
 
 export const store = configureStore({
     reducer:{
         [userApi.reducerPath] : userApi.reducer,
         user:userAuth,
         [spaceApi.reducerPath]: spaceApi.reducer,
-        [privateSpaceApi.reducerPath] : spaceApi.reducer
+        [privateSpaceApi.reducerPath] : spaceApi.reducer,
+        [documentApi.reducerPath]:documentApi.reducer
     },
     ///@ts-ignore
     middleware:(getDefaultMiddleware)=>
-        getDefaultMiddleware().concat([userApi.middleware , spaceApi.middleware , privateSpaceApi.middleware])
+        getDefaultMiddleware().concat([userApi.middleware , spaceApi.middleware , privateSpaceApi.middleware , documentApi.middleware])
 })
 
 setupListeners(store.dispatch)

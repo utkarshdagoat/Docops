@@ -6,12 +6,15 @@ import { Provider } from 'react-redux'
 import {  store } from './apps/store'
 
 import { BrowserRouter } from 'react-router-dom'
+import {NextUIProvider} from "@nextui-org/react";
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
       <Provider store={store}>
+        <NextUIProvider >
         <App />
+        </NextUIProvider>
       </Provider>
     </BrowserRouter>
   </React.StrictMode>,

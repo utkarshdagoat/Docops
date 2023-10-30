@@ -16,6 +16,7 @@ const IMAGES = {
     loading:new URL('./logos/loading.svg' , import.meta.url).href,
     
     bullet:new URL('./logos/bullet.svg' , import.meta.url).href,
+    emptyState:new URL('./background/empty-state.png' , import.meta.url).href,
     
      
 }

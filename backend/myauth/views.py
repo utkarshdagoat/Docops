@@ -50,14 +50,12 @@ class TokenRedirectAPIView(views.APIView):
     def get(self, request , *args , **kwargs):
         code = request.GET.get('code' , '') 
         _header = headerFromCode(code)
-        # checks if there is error from code
         try:
             _header["error"]
             return Response(data=_header['res'],status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except  KeyError:
             pass
         user_data = requests.get(USER_INFO_URL , headers=_header).json()
-        # user_data contains a dict with key detail on error
         try:
             if user_data['detail']:
                 return Response(data=user_data , status=status.HTTP_500_INTERNAL_SERVER_ERROR)

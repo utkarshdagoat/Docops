@@ -8,6 +8,7 @@ import './App.css'
 import { useAppSelector } from "./hooks/redux"
 import { useEffect } from "react"
 import Space from "./pages/spaces"
+import NewDocument from "./pages/document-new"
 
 
  function App()  {
@@ -29,7 +30,7 @@ import Space from "./pages/spaces"
         <Navbar />
         <Routes>
           <Route path="/" index element={<Home />}/>
-          <Route path="document/:name" element={<DocumentDetail />} />
+          <Route path="space/:name/document/:id" element={<NewDocument />} />
           <Route path="spaces" element={<Space />} />
         </Routes>
       </> 

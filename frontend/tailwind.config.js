@@ -14,13 +14,18 @@ module.exports = {
       maxWidth:{
         "4/5":'80%',
         '1/2':"50%",
-        '1/3':"33%"
+        '1/3':"33%",
+        '1/5':'20%'
       },boxShadow:{
         '3xl':'7px 3px 22px 14px rgba(0, 0, 0, 0.19); '
       },
       backgroundColor:{
         "slash-hover":'rgba(55, 53, 47, 0.25);'
       },
+      transitionProperty: {
+        'height': 'height',
+        'spacing': 'margin, padding',
+      }
     },
   },
   darkMode: "class",

@@ -19,7 +19,8 @@ from spaces.models.space import Space
 from docops.authentication import CsrfExemptSessionAuthentication
 
 from.services import UserFromRequest , headerFromCode
-from .serializers import UserSerializers , UserSpacesSerializers
+from myauth.serializers.serializers import UserSerializers
+from myauth.serializers.spaceSerializer import UserSpacesSerializers
 from constants.constants import AUTH_CODE_URL , BACKEND_URL_REDIRECT ,USER_INFO_URL , CLIENT_ID
 
 class isLoggedIn(views.APIView):
@@ -115,6 +116,9 @@ class UserAPIView(generics.GenericAPIView ,mixins.RetrieveModelMixin):
 
     def get(self, request , *args , **kwargs):
         return self.retrieve(request=request , *args , **kwargs)
+
+
+        
 
 class UserSpaceAPIView(generics.GenericAPIView , mixins.ListModelMixin):
     serializer_class = UserSpacesSerializers

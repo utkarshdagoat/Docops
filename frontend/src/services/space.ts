@@ -1,5 +1,11 @@
-import {createApi  , fetchBaseQuery} from '@reduxjs/toolkit/query/react'
+import {FetchBaseQueryError, createApi  , fetchBaseQuery} from '@reduxjs/toolkit/query/react'
 import { userState } from '../features/user/userSlice'
+
+
+export interface SpaceFiles {
+    heading:string | null,
+    docId:string
+}
 
 export interface SpaceResponse{
     name:string,
@@ -7,13 +13,18 @@ export interface SpaceResponse{
     users:userState[],
     isPrivate:boolean,
     creater:userState,
-    invite_code:string
+    invite_code:string,
+    files:SpaceFiles[] | null 
 }
 
 export interface SpaceInput{
     name:string,
     description:string
 }
+
+
+
+
 
 export const spaceApi = createApi({
     reducerPath:"spaceApi",
@@ -31,9 +42,14 @@ export const spaceApi = createApi({
                     "Content-Type":"application/json; charset=UTF-8"
                 }
             })
-        })
+        }),
+        getFilesForSpaces:builder.query<SpaceResponse[],void>({
+           query:(payload)=>({
+            url:'auth/user/spaces'
+           })
+          })
     })
 })
 
 
-export const {useGetSpaceQuery  , useCreatePublicSpaceQuery} = spaceApi
+export const {useGetSpaceQuery  , useCreatePublicSpaceQuery , useGetFilesForSpacesQuery} = spaceApi

@@ -4,7 +4,7 @@ from constants.constants import REQUEST_STATE
 from rest_framework import serializers
 
 from spaces.services import RequestInstanceForSendingRequest , updateRequestInstance 
-from myauth.serializers import UserSerializers
+from myauth.serializers.serializers import UserSerializers
 
 class SendRequestSerializer(serializers.ModelSerializer):
     space = serializers.HyperlinkedRelatedField(

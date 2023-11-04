@@ -2,7 +2,7 @@ from django.contrib.auth.models import Permission
 
 from rest_framework import serializers
 
-from myauth.serializers import UserSerializers
+from myauth.serializers.serializers import UserSerializers
 
 from .models.space import Space
 from .models.request import Request

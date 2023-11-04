@@ -11,9 +11,15 @@ from rest_framework.authentication import SessionAuthentication
 from docops.authentication import CsrfExemptSessionAuthentication
 from files.models.file_store import FileDoc
 from files.models.file import File
-from .serializer import FileSerializer , HeadingFileSerializer , CoverFileSerializer , FileRetriveSerializer
+from .serializer import FileSerializer , HeadingFileSerializer , CoverFileSerializer , FileRetriveSerializer , FileSpaceShowSerializer ,FileTextSerializer
 from rest_framework import parsers
 from files.parser import MultiPartJsonParser
+
+from .models.file import FileText
+
+from spaces.models.space import Space
+
+
 
 
 class RetrieveFileAPIView(generics.GenericAPIView):
@@ -31,12 +37,12 @@ class RetrieveFileAPIView(generics.GenericAPIView):
             }
             file  = FileDoc.objects.get(id=instance.docId)
             serializer = FileRetriveSerializer(data=data)
-            serializer.is_valid(raise_exception=True)
-            res = {
-                "meta":serializer.data,
-                "doc":file.doc
-            }
-            return Response(res)
+            if  serializer.is_valid(raise_exception=True):
+                res = {
+                    "meta":serializer.data,
+                    "doc":file.doc
+                }
+                return Response(res)
             return Response(serializer.errors)
         except File.DoesNotExist:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -50,18 +56,6 @@ class FileAPIView(generics.GenericAPIView , mixins.ListModelMixin):
     queryset = File.objects.all()
     serializer_class = FileSerializer
 
-    def get(self , request,*args,**kwargs):
-        try:
-            instance = File.objects.get(docId=self.kwargs['doc_id'])
-            serailizer = FileSerializer(data=instance)
-            if serailizer.is_valid():
-                serailizer.save()
-                return Response(serailizer.data)
-            return Response(serailizer.errors)
-        except File.DoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        
-
     def post(self , request , *args , **kwargs):
         serializer_data = {
             "space":request.data['space'],
@@ -71,6 +65,7 @@ class FileAPIView(generics.GenericAPIView , mixins.ListModelMixin):
         serializer.is_valid(raise_exception=True)
         file = serializer.save()
         fileStore = FileDoc(sqlRef=file.id)
+        file_text = FileText.objects.create(file=file , text='')
         fileStore.save()
         file.docId = str(fileStore.id)
         docId = file.docId
@@ -83,10 +78,10 @@ class FileAPIView(generics.GenericAPIView , mixins.ListModelMixin):
 class UpdateFileAPIView(views.APIView):
     permission_classes = [IsAuthenticated ,]
     authentication_classes = [CsrfExemptSessionAuthentication,]
-    parser_classes=[MultiPartJsonParser , parsers.JSONParser]
+    parser_classes=[ parsers.JSONParser]
 
-    def put (self,request,doId ,*args,**kwargs):
-        docInstance = FileDoc.objects.get(id=docId)
+    def put (self,request ,*args,**kwargs):
+        docInstance = FileDoc.objects.get(id=self.kwargs['doc_id'])
         docInstance.doc = request.data['doc']
         docInstance.save()
         return Response("True")
@@ -103,9 +98,12 @@ class UpdataHeadingAPIView(generics.GenericAPIView):
     def put(self , request ,  *args , **kwargs ):
         try:
             instance = File.objects.get(docId=self.kwargs['doc_id'])
+            print(request.data)
             serailizer = HeadingFileSerializer(instance , data=request.data)
+            print(request.data)
             if serailizer.is_valid():
                 serailizer.save()
+                print(serailizer.data)
                 return Response(serailizer.data)
             return Response(serailizer.errors)
         except File.DoesNotExist:
@@ -127,8 +125,39 @@ class UpdateCoverAPIView(generics.GenericAPIView , mixins.UpdateModelMixin):
             serailizer = CoverFileSerializer(instance , data=request.data)
             if serailizer.is_valid():
                 serailizer.save()
+                print(serailizer.data)
                 return Response(serailizer.data)
             return Response(serailizer.errors)
         except File.DoesNotExist:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+class ListFilesSpaceAPIView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [CsrfExemptSessionAuthentication]
+    serializer_class = FileSpaceShowSerializer
+
+    def get_queryset(self):
+        space_id = self.kwargs['space_id']
+        space = Space.objects.get(id=space_id)
+        file_queryset = File.objects.filter(space=space)
+        return file_queryset
+
+class FileTextAPIView(generics.GenericAPIView):
+    authentication_classes = [CsrfExemptSessionAuthentication ,]
+    permission_classes = [IsAuthenticated]
+    serializer_class = FileTextSerializer
+    queryset = FileText.objects.all()
+    lookup_url_kwarg='doc_id'
+
+    def put(self , request , *args , **kwargs):
+        doc_id = kwargs['doc_id']
+        file = File.objects.get(docId=doc_id)
+        instance = FileText.objects.get(file=file)
+        serilizer = FileTextSerializer(data=request.data , instance=instance)
+        serilizer.is_valid(raise_exception=True)
+        serilizer.save()
+        return Response(serilizer.data)
         

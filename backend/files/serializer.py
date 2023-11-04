@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from files.models.file import File
+from files.models.file import File , FileText
 
 from spaces.models.space import Space
-from myauth.serializers import UserSerializers
+from myauth.serializers.serializers import UserSerializers
 
 import uuid
 
@@ -52,5 +52,24 @@ class CoverFileSerializer(serializers.Serializer):
     def update(self,instance,validated_data):
         cover = validated_data['cover']
         instance.cover = cover
+        instance.save()
+        return instance
+
+
+
+class FileSpaceShowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = File
+        fields = ['heading' , 'docId']
+
+class FileTextSerializer(serializers.ModelSerializer):
+    file = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model=FileText
+        fields = ['file' , 'text']
+    
+    def update(self , instance , validated_data):
+        instance.text = validated_data['text']
         instance.save()
         return instance

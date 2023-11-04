@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { spaceApi, useGetSpaceQuery } from "../services/space";
+import { SpaceFiles, SpaceResponse, spaceApi, useGetFilesForSpacesQuery, useGetSpaceQuery } from "../services/space";
 import IMAGES from "../images/Images";
 
 
@@ -31,9 +31,10 @@ enum active {
     user = 2
 }
 
+
 const Space: FC = () => {
 
-    const { data, isLoading, error } = useGetSpaceQuery()
+    const { data, isLoading, error } = useGetFilesForSpacesQuery()
     const { isOpen, onOpen, onOpenChange } = useDisclosure()
     const [name, setName] = useState<string>('')
     const [description, setDescription] = useState<string>('')
@@ -45,7 +46,7 @@ const Space: FC = () => {
     const [publicTrigger, publicData] = spaceApi.endpoints.createPublicSpace.useLazyQuery()
     const [privateTrigger, privateData] = privateSpaceApi.endpoints.createPrivateSpace.useLazyQuery()
 
-    const [trigger, doc] = documentApi.endpoints.saveDoc.useLazyQuery()
+    const [trigger, docId] = documentApi.endpoints.saveDoc.useLazyQuery()
 
     const handleSubmit = () => {
         if (isPrivate) {
@@ -61,27 +62,25 @@ const Space: FC = () => {
     const handleSpaceClick = (index: number) => {
         if (data?.[index].name) {
             const spaceName: fileCreation = {
-                space: data?.[index].name
+                space: data?.[index].name,
+                cover: null,
+                heading: '',
+                isPrivate: false
             }
             trigger(spaceName)
             setSelectedSpace(index)
         }
     }
 
+
     useEffect(() => {
-        console.log(selectedSpace)
-        console.log(doc?.data)
-        if (selectedSpace !== null) {
-            if (data) {
-                if (doc.data) {
-                    navigate(`/space/${data?.[selectedSpace]?.name}/document/${doc.data}`)
-                }
-            }
+        if (selectedSpace && docId.data) {
+            navigate(`/space/${data?.[selectedSpace].name}/document/${docId.data}`)
         }
-    }, [doc?.data, doc?.error, selectedSpace])
+    }, [selectedSpace, docId.data])
 
     return (
-        <div className="flex justify-center items-center space-x-28 my-0 mx-auto p-20" >
+        <div className="flex justify-center items-center space-x-28 my-0 mx-auto" >
             {error ? (
                 <>Oh no something went wrong</>
             ) : isLoading ? (
@@ -98,10 +97,10 @@ const Space: FC = () => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex flex-wrap justify-evenly space-x-3">
-                                {data.map((space: any, index: number) => (
+                            <div className="flex flex-wrap justify-evenly space-x-3`">
+                                {data.map((space, index: number) => (
                                     <>
-                                        <Card className="m-6 p-4" key={index}>
+                                        <Card className="m-6 px-6 py-4" key={index}>
                                             <CardHeader className="justify-between hover:cursor-pointer">
                                                 <div className="flex gap-5">
                                                     <div className="flex flex-col gap-1 items-start justify-center">
@@ -110,19 +109,35 @@ const Space: FC = () => {
                                                     </div>
                                                 </div>
                                             </CardHeader>
-                                            <CardBody className="px-3 py-0 text-small text-default-400">
+                                            <CardBody className="px-3 py-0 text-lg text-default-400">
                                                 {space.description}
                                             </CardBody>
+                                            <div className="flex-col space-y-3 p-2">
+                                                {
+                                                    space.files?.map((file, index: number) => (
+                                                        <Card key={file.docId} isPressable className="w-full border-purple-400 border"
 
-                                            <CardFooter className="gap-3">
-                                                <div className="flex gap-1">
-                                                    <p className="font-semibold text-default-400 text-small">{space.users.length} </p>
-                                                    <p className="text-default-400 text-small">User</p>
-                                                </div>
-                                                <div className="flex gap-1">
-                                                    <p className="font-semibold text-default-400 text-small">97.1K</p>
-                                                    <p className="text-default-400 text-small">Followers</p>
-                                                </div>{!doc.isLoading ?
+                                                            onPress={() => navigate(`/space/${space.name}/document/${file.docId}`)}
+                                                        >
+                                                            <CardBody className="text-sm text-zinc-500 font-bold">
+                                                                {index + 1} {')'} {"     "} {file.heading ? file.heading : "Untitled"}
+                                                            </CardBody>
+                                                        </Card>
+                                                    ))
+                                                }
+                                            </div>
+                                            <CardFooter className="flex justify-between">
+                                                <div className="flex gap-3">
+                                                    <div className="flex gap-1">
+                                                        <p className="font-semibold text-default-400 text-small">{space.users.length} </p>
+                                                        <p className="text-default-400 text-small">User</p>
+                                                    </div>
+                                                    <div className="flex gap-1">
+                                                        <p className="font-semibold text-default-400 text-small">{space.files?.length}</p>
+                                                        <p className="text-default-400 text-small">Files</p>
+                                                    </div>
+
+                                                </div>{!docId.isLoading ?
                                                     (
                                                         <Button color="secondary" variant="ghost" onClick={() => handleSpaceClick(index)}>Add File</Button>
                                                     ) : (

@@ -10,8 +10,9 @@ from spaces.services import doesSpaceNameExist , PublicSpaceInstanceFromContext 
 
 from constants.constants import REQUEST_STATE
 
-from myauth.serializers import UserSerializers
+from myauth.serializers.serializers import UserSerializers
 
+from files.serializer import FileSpaceShowSerializer
 
 class PublicSpaceSerializer(serializers.ModelSerializer):
     creater = UserSerializers(read_only=True)
@@ -19,7 +20,7 @@ class PublicSpaceSerializer(serializers.ModelSerializer):
     invite_code = serializers.UUIDField(default=uuid.uuid4 , read_only=True)
     class Meta:
         model = Space 
-        fields= ['name' , 'creater' , 'isPrivate' , 'invite_code', 'description' ]
+        fields= ['name' , 'creater' , 'isPrivate' , 'invite_code', 'description' , 'id' ]
 
     def create(self, validated_data):
         return PublicSpaceInstanceFromContext(context=self.context , validated_data=validated_data)
@@ -32,7 +33,7 @@ class PrivateSpaceSerializer(serializers.ModelSerializer):
     invite_code = serializers.UUIDField(default=uuid.uuid4 , read_only=True)
     class Meta:
         model=Space
-        fields=[ 'name' ,'creater' , 'users' , 'invite_code' , 'isPrivate' , 'description']
+        fields=[ 'name' ,'creater' , 'users' , 'invite_code' , 'isPrivate' , 'description' , 'id']
 
     def create(self,validated_data):
         validated_data['creater'] =  self.context['request'].user  
@@ -43,3 +44,6 @@ class PrivateSpaceSerializer(serializers.ModelSerializer):
 
 class SpacePermissionSerializer(serializers.Serializer):
     can_edit = serializers.BooleanField(default=False)
+
+
+

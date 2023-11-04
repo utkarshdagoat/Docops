@@ -29,7 +29,6 @@ const SelectionMenu= ({editor , selectionType , setSelectionType}:SelectionMenuP
         placement:'bottom',
         animation:'perspective',
         theme:'custom',
-        followCursor:true
     })
     switch(selectionType){
         case null:

@@ -72,3 +72,5 @@ class AcceptOrRejectRequestAPIView(generics.GenericAPIView, mixins.UpdateModelMi
 
     def put(self,request,*args,**kwargs):
         return self.update(request=request , *args , **kwargs)
+
+

@@ -1,14 +1,14 @@
 import { useGetUserDataQuery, userApi } from "./services/user"
 import { Route, Routes } from "react-router-dom"
 import Home from "./pages/home"
-import DocumentDetail from "./pages/document-detail"
 import Login from "./pages/Login"
 import Navbar from "./components/Navbar"
 import './App.css'
 import { useAppSelector } from "./hooks/redux"
 import { useEffect } from "react"
 import Space from "./pages/spaces"
-import NewDocument from "./pages/document-new"
+import DocumentDetail from "./pages/document-detail"
+
 
 
  function App()  {
@@ -30,7 +30,7 @@ import NewDocument from "./pages/document-new"
         <Navbar />
         <Routes>
           <Route path="/" index element={<Home />}/>
-          <Route path="space/:name/document/:id" element={<NewDocument />} />
+          <Route path="space/:name/document/:id/:isNew?" element={<DocumentDetail />} />
           <Route path="spaces" element={<Space />} />
         </Routes>
       </> 

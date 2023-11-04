@@ -33,6 +33,7 @@ AUTH_USER_MODEL='myauth.User'
 
 INSTALLED_APPS = [
     "daphne",
+    'django_elasticsearch_dsl',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,7 +44,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'spaces',
     'files',
-    'channels',
 ]
 
 MIDDLEWARE = [
@@ -161,10 +161,17 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": ["redis://:Gg0BX97LCsyLEf1mrwd32NZStOQP5pSe@redis-17270.c301.ap-south-1-1.ec2.cloud.redislabs.com:17270/0"],
+            "hosts": [("127.0.0.1" , 6379)],
         },
     },
 }
 
 
+ELASTICSEARCH_DSL={
+    'default': {
+        'hosts': 'https://localhost:9200',
+        'http_auth': ('elastic', 'VKK_DHK02uV4Vojozc*-'),
+        'ca_certs':'/home/utkarsh/elasticsearch-8.10.4/config/certs/http_ca.crt'
+    }
+}
 
